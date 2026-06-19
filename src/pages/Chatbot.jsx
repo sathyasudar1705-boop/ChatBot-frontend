@@ -200,8 +200,8 @@ export default function Chatbot({ user }) {
   const [messages, setMessages]               = useState([]);
   const [inputText, setInputText]             = useState('');
   const [lastMessages, setLastMessages]       = useState({});
-  const [provider, setProvider]               = useState('gemini');
-  const [model, setModel]                     = useState('gemini-1.5-flash');
+  const [provider, setProvider]               = useState('mistral');
+  const [model, setModel]                     = useState('open-mixtral-8x7b');
   const [providerModelsState, setProviderModelsState] = useState(providerModels);
   const [loading, setLoading]                 = useState(true);
   const [sending, setSending]                 = useState(false);
