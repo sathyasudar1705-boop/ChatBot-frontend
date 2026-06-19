@@ -202,6 +202,7 @@ export default function Chatbot({ user }) {
   const [lastMessages, setLastMessages]       = useState({});
   const [provider, setProvider]               = useState('gemini');
   const [model, setModel]                     = useState('gemini-1.5-flash');
+  const [providerModelsState, setProviderModelsState] = useState(providerModels);
   const [loading, setLoading]                 = useState(true);
   const [sending, setSending]                 = useState(false);
   const [copiedId, setCopiedId]               = useState(null);
@@ -357,6 +358,11 @@ export default function Chatbot({ user }) {
     const init = async () => {
       setLoading(true);
       try {
+        const modelsRes = await fetch('/api/models', { headers: { Authorization: `Bearer ${token}` } });
+        if (modelsRes.ok) {
+          const modelsData = await modelsRes.json();
+          setProviderModelsState(modelsData);
+        }
         const settingsRes = await fetch('/api/settings', { headers: { Authorization: `Bearer ${token}` } });
         if (settingsRes.ok) {
           const s = await settingsRes.json();
@@ -557,7 +563,7 @@ export default function Chatbot({ user }) {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleProviderChange = (p) => { setProvider(p); setModel(providerModels[p]?.[0] || ''); };
+  const handleProviderChange = (p) => { setProvider(p); setModel(providerModelsState[p]?.[0] || ''); };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
@@ -705,7 +711,7 @@ export default function Chatbot({ user }) {
                   const nextModel = imageProviderModels[nextProvider]?.[0] || 'auto';
                   setModel(nextModel);
                 } else {
-                  const nextModel = providerModels[provider]?.[0] || '';
+                  const nextModel = providerModelsState[provider]?.[0] || '';
                   setModel(nextModel);
                 }
               }}
@@ -732,20 +738,20 @@ export default function Chatbot({ user }) {
 
             <PillSelect
               value={provider}
-              options={isImageMode ? ['gemini', 'openrouter', 'mistral'] : Object.keys(providerModels)}
+              options={isImageMode ? ['gemini', 'openrouter', 'mistral'] : Object.keys(providerModelsState)}
               onChange={(p) => {
                 setProvider(p);
                 if (isImageMode) {
                   setModel(imageProviderModels[p]?.[0] || 'auto');
                 } else {
-                  setModel(providerModels[p]?.[0] || '');
+                  setModel(providerModelsState[p]?.[0] || '');
                 }
               }}
               optionLabel={(o) => providerLabels[o] || o}
             />
             <PillSelect
               value={model}
-              options={isImageMode ? (imageProviderModels[provider] || ['auto']) : (providerModels[provider] || [])}
+              options={isImageMode ? (imageProviderModels[provider] || ['auto']) : (providerModelsState[provider] || [])}
               onChange={setModel}
               optionLabel={(o) => o.split('/').pop()}
             />
